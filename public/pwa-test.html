@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste PWA - Sistema de Matrícula</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .info { border-left-color: #17a2b8; background: #d1ecf1; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #5a6fd8; }
+        .status { font-weight: bold; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Teste de Funcionalidade PWA</h1>
+    <p>Esta página testa se o PWA está funcionando corretamente em diferentes navegadores.</p>
+
+    <div id="tests"></div>
+
+    <h2>🎛️ Controles de Teste</h2>
+    <button onclick="testServiceWorker()">Testar Service Worker</button>
+    <button onclick="testManifest()">Testar Manifest</button>
+    <button onclick="testCache()">Testar Cache</button>
+    <button onclick="testInstallPrompt()">Testar Instalação</button>
+    <button onclick="clearTests()">Limpar Testes</button>
+
+    <h2>📊 Informações do Navegador</h2>
+    <div id="browser-info"></div>
+
+    <h2>📋 Log de Eventos</h2>
+    <pre id="log"></pre>
+
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            logElement.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[PWA Test] ${message}`);
+        }
+
+        // Clear tests
+        function clearTests() {
+            document.getElementById('tests').innerHTML = '';
+            document.getElementById('log').textContent = '';
+            log('Testes limpos');
+        }
+
+        // Add test result
+        function addTestResult(title, status, message, details = '') {
+            const testsDiv = document.getElementById('tests');
+            const statusClass = status === 'success' ? 'success' : 
+                              status === 'warning' ? 'warning' : 
+                              status === 'error' ? 'error' : 'info';
+            
+            testsDiv.innerHTML += `
+                <div class="test-item ${statusClass}">
+                    <strong>${title}</strong>
+                    <div class="status">${status.charAt(0).toUpperCase() + status.slice(1)}: ${message}</div>
+                    ${details ? `<div style="margin-top: 5px; font-size: 0.9em;">${details}</div>` : ''}
+                </div>
+            `;
+            log(`${title}: ${message}`);
+        }
+
+        // Test Service Worker
+        async function testServiceWorker() {
+            log('Iniciando teste do Service Worker...');
+            
+            if (!('serviceWorker' in navigator)) {
+                addTestResult('Service Worker', 'error', 'Não suportado neste navegador');
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    addTestResult('Service Worker', 'success', 'Registrado e ativo', 
+                        `Scope: ${registration.scope}<br>Estado: ${registration.active ? 'Ativo' : 'Inativo'}`);
+                } else {
+                    addTestResult('Service Worker', 'warning', 'Não encontrado', 
+                        'Tentando registrar...');
+                    
+                    const newReg = await navigator.serviceWorker.register('/sw.js');
+                    addTestResult('Service Worker', 'success', 'Registrado com sucesso');
+                }
+            } catch (error) {
+                addTestResult('Service Worker', 'error', error.message);
+            }
+        }
+
+        // Test Manifest
+        async function testManifest() {
+            log('Testando manifest...');
+            
+            try {
+                const response = await fetch('/manifest.json');
+                if (response.ok) {
+                    const manifest = await response.json();
+                    addTestResult('Manifest', 'success', 'Arquivo encontrado e válido', 
+                        `Nome: ${manifest.name}<br>Ícones: ${manifest.icons.length} encontrados`);
+                } else {
+                    addTestResult('Manifest', 'error', 'Arquivo não encontrado');
+                }
+            } catch (error) {
+                addTestResult('Manifest', 'error', error.message);
+            }
+        }
+
+        // Test Cache
+        async function testCache() {
+            log('Testando cache...');
+            
+            if (!('caches' in window)) {
+                addTestResult('Cache API', 'error', 'Não suportado neste navegador');
+                return;
+            }
+
+            try {
+                const cacheNames = await caches.keys();
+                if (cacheNames.length > 0) {
+                    addTestResult('Cache API', 'success', 'Caches encontrados', 
+                        `Caches ativos: ${cacheNames.join(', ')}`);
+                    
+                    // Test cache content
+                    for (const cacheName of cacheNames) {
+                        const cache = await caches.open(cacheName);
+                        const keys = await cache.keys();
+                        addTestResult(`Cache: ${cacheName}`, 'info', `${keys.length} itens armazenados`);
+                    }
+                } else {
+                    addTestResult('Cache API', 'warning', 'Nenhum cache encontrado');
+                }
+            } catch (error) {
+                addTestResult('Cache API', 'error', error.message);
+            }
+        }
+
+        // Test Install Prompt
+        function testInstallPrompt() {
+            log('Testando prompt de instalação...');
+            
+            if (window.deferredPrompt) {
+                addTestResult('Install Prompt', 'success', 'Disponível para instalação');
+                window.deferredPrompt.prompt();
+            } else {
+                addTestResult('Install Prompt', 'info', 'Não disponível', 
+                    'PWA pode já estar instalado ou navegador não suporta');
+            }
+        }
+
+        // Browser info
+        function displayBrowserInfo() {
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Plataforma': navigator.platform,
+                'Idioma': navigator.language,
+                'Online': navigator.onLine ? 'Sim' : 'Não',
+                'Service Worker Suportado': 'serviceWorker' in navigator ? 'Sim' : 'Não',
+                'Cache API Suportada': 'caches' in window ? 'Sim' : 'Não',
+                'IndexedDB Suportado': 'indexedDB' in window ? 'Sim' : 'Não',
+                'Notification Suportada': 'Notification' in window ? 'Sim' : 'Não'
+            };
+
+            const browserInfoDiv = document.getElementById('browser-info');
+            browserInfoDiv.innerHTML = Object.entries(info)
+                .map(([key, value]) => `<div class="test-item info"><strong>${key}:</strong> ${value}</div>`)
+                .join('');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Página de teste PWA carregada');
+            displayBrowserInfo();
+            
+            // Auto-run basic tests
+            setTimeout(() => {
+                testServiceWorker();
+                testManifest();
+                testCache();
+            }, 1000);
+        });
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.deferredPrompt = e;
+            log('Prompt de instalação detectado');
+            addTestResult('Install Prompt', 'success', 'Detectado e capturado');
+        });
+
+        // Listen for app install
+        window.addEventListener('appinstalled', function(e) {
+            log('PWA instalado com sucesso');
+            addTestResult('Instalação', 'success', 'PWA foi instalado');
+            window.deferredPrompt = null;
+        });
+
+        // Listen for online/offline
+        window.addEventListener('online', () => {
+            log('Conectado à internet');
+            addTestResult('Conectividade', 'success', 'Online');
+        });
+
+        window.addEventListener('offline', () => {
+            log('Desconectado da internet');
+            addTestResult('Conectividade', 'warning', 'Offline');
+        });
+    </script>
+</body>
+</html>

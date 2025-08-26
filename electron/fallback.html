@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Matrícula - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #667eea;
+        }
+        .status {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .debug-info {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📚</div>
+        <h1>Sistema de Matrícula</h1>
+        <p>ONG Grupo Ação Solidária</p>
+        
+        <div class="status">
+            <h2>Status: Iniciando...</h2>
+            <p id="status-text">Carregando aplicação...</p>
+        </div>
+
+        <div>
+            <button onclick="testConnection()">Testar Conexão</button>
+            <button onclick="openDevServer()">Abrir Servidor Dev</button>
+            <button onclick="reloadApp()">Recarregar</button>
+        </div>
+
+        <div class="debug-info">
+            <strong>Informações de Debug:</strong><br>
+            <div id="debug-info">
+                User Agent: <span id="user-agent"></span><br>
+                URL atual: <span id="current-url"></span><br>
+                Timestamp: <span id="timestamp"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Informações de debug
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+
+        function updateStatus(message) {
+            document.getElementById('status-text').textContent = message;
+        }
+
+        function testConnection() {
+            updateStatus('Testando conexão...');
+            
+            // Testar conexão com Google (teste de internet)
+            fetch('https://www.google.com/favicon.ico', { mode: 'no-cors' })
+                .then(() => {
+                    updateStatus('✅ Internet funcionando');
+                    testLocalServer();
+                })
+                .catch(() => {
+                    updateStatus('❌ Sem conexão com internet');
+                });
+        }
+
+        function testLocalServer() {
+            // Testar servidor local
+            fetch('http://localhost:3007')
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus('✅ Servidor dev encontrado na porta 3007');
+                    } else {
+                        updateStatus('⚠️ Servidor dev responde mas com erro');
+                    }
+                })
+                .catch(() => {
+                    // Testar porta 3008
+                    fetch('http://localhost:3008')
+                        .then(response => {
+                            if (response.ok) {
+                                updateStatus('✅ Servidor prod encontrado na porta 3008');
+                            } else {
+                                updateStatus('⚠️ Servidor prod responde mas com erro');
+                            }
+                        })
+                        .catch(() => {
+                            updateStatus('❌ Nenhum servidor local encontrado');
+                        });
+                });
+        }
+
+        function openDevServer() {
+            window.location.href = 'http://localhost:3007';
+        }
+
+        function reloadApp() {
+            window.location.reload();
+        }
+
+        // Testar conexão automaticamente após 2 segundos
+        setTimeout(testConnection, 2000);
+    </script>
+</body>
+</html>

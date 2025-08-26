@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx tailwindcss init:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run:*)",
+      "Bash(npx next lint:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(copy:*)",
+      "Bash(rg:*)",
+      "Bash(if exist dist rmdir /s /q dist)",
+      "Bash(timeout:*)",
+      "Bash(\"./Sistema de Matrícula.exe\" --no-sandbox --disable-dev-shm-usage)",
+      "Bash(\"./Sistema de Matrícula.exe\" --no-sandbox)",
+      "Bash(\"./Sistema de Matrícula.exe\" --enable-logging --log-level=0)",
+      "Bash(taskkill:*)",
+      "Bash(npm start:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(cmd /c \"taskkill /pid 16596 /f\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

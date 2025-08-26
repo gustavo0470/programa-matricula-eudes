@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id                    String   @id @default(cuid())
+  enrollment            String   @unique // GASI xxx/ano.atual
+  name                  String
+  documentType          String   // "RG", "CIN", or "BIRTH_CERTIFICATE"
+  documentNumber        String
+  cpf                   String?  // Only if documentType is "RG"
+  birthDate             DateTime
+  fatherName            String?  // Optional
+  motherName            String   // Required
+  address               String
+  neighborhood          String
+  zipCode               String
+  state                 String
+  city                  String
+  phone                 String
+  email                 String
+  imageRights           Boolean  @default(false)
+  hasAllergies          Boolean  @default(false)
+  allergyDescription    String?
+  status                String   @default("ACTIVE") // ACTIVE, INACTIVE, CANCELLED
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  enrollments           Enrollment[]
+  documents             DocumentUpload[]
+  
+  @@map("students")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  enrollments Enrollment[]
+  
+  @@map("courses")
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  studentId   String
+  courseId    String
+  weekdays    String[] // Array of weekdays ["MONDAY", "TUESDAY", etc]
+  schedule    String   // Custom or predefined schedule
+  status      String   @default("ACTIVE") // ACTIVE, CANCELLED
+  enrolledAt  DateTime @default(now())
+  
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@map("enrollments")
+}
+
+model DocumentUpload {
+  id               String   @id @default(cuid())
+  studentId        String
+  documentType     String   // "BIRTH_CERTIFICATE", "STUDENT_DOCUMENT", "GUARDIAN_DOCUMENT", "ADDRESS_PROOF"
+  filename         String
+  fileUrl          String
+  fileType         String
+  isSubmitted      Boolean  @default(false)
+  uploadedAt       DateTime @default(now())
+  
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  @@map("document_uploads")
+}

@@ -1,0 +1,1 @@
+console.log("Hello World! TypeScript + Tailwind CSS v3 setup complete!");

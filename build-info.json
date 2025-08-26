@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-08-26T15:26:57.842Z",
+  "version": "1.0.0",
+  "type": "PWA",
+  "nextjs": true,
+  "pwa": true,
+  "offline": true,
+  "files": {
+    "manifest": true,
+    "serviceWorker": true,
+    "offlinePage": true
+  },
+  "icons": {
+    "icon-72x72": false,
+    "icon-96x96": false,
+    "icon-128x128": false,
+    "icon-144x144": false,
+    "icon-152x152": false,
+    "icon-192x192": false,
+    "icon-384x384": false,
+    "icon-512x512": false
+  }
+}
