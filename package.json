@@ -19,6 +19,7 @@
     "test:system": "node scripts/test-system.js",
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
+    "db:clear": "node scripts/clear-database.js",
     "build:production": "node scripts/build-production.js",
     "test:electron": "node scripts/test-electron.js",
     "debug:electron": "electron electron/main-debug.js",
