@@ -1,27 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Performance optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  
-  // Don't use static export because of API routes
-  trailingSlash: true,
-  skipTrailingSlashRedirect: true,
-  
-  // Images optimization configuration
-  images: {
-    unoptimized: true
-  },
-
-  // Disable ESLint during builds if needed
+  // Essential configurations for Vercel deployment
   eslint: {
     ignoreDuringBuilds: true
   },
-
-  // Environment variables for Electron
-  env: {
-    ELECTRON: process.env.ELECTRON || 'false'
+  
+  // Images optimization
+  images: {
+    unoptimized: true
   },
 
   // Webpack optimizations (simplified to avoid SSR issues)
@@ -32,17 +18,7 @@ const nextConfig = {
       config.externals.push(/^sw\.js$/);
     }
     return config;
-  },
-
-  // Configuração condicional para Electron (sem static export)
-  ...(process.env.BUILD_ELECTRON === 'true' && {
-    generateBuildId: () => 'build'
-  }),
-
-  // Experimental features (disabled due to missing critters dependency)
-  // experimental: {
-  //   optimizeCss: true
-  // }
+  }
 }
 
 module.exports = nextConfig
